@@ -1,0 +1,157 @@
+create schema "online_challenge_activity";
+set search_path to "online_challenge_activity";
+set datestyle to "MDY";
+
+CREATE TABLE SetIcone{
+	Nome varchar(30) PRIMARY KEY ,
+	Dim decimal (8,0) NOT NULL 
+}
+
+CREATE TABLE IconeSquadre{
+	Immagine varchar(100) PRIMARY KEY,
+	SetIcona varchar(30) REFERENCES SetIcone (Nome)
+}
+
+CREATE TABLE Utenti{
+	Email varchar(50) PRIMARY KEY,
+	Nickname varchar(30) NOT NULL,
+	Nome varchar(30),
+	Cognome varchar(30),
+	DataN date
+}
+
+CREATE TABLE Quiz{
+	Id decimal(8,0) PRIMARY KEY,
+	Immagine varchar(100),
+	Testo varchar(400) NOT NULL
+}
+
+CREATE TABLE Task{
+	Id decimal(8,0) PRIMARY KEY,
+	Testo varchar(400) NOT NULL,
+	Punteggio integer NOT NULL
+}
+
+CREATE TABLE Giochi{
+	Id decimal(8,0) PRIMARY KEY,
+	Sfondo varchar(100) NOT NULL,
+	NSquadreMax decimal(3,0) NOT NULL,
+	SetIcona varchar(50)  REFERENCES SetIcone (Nome) NOT NULL,
+	NDadi decimal(2,0) NOT NULL DEFAULT 0
+}
+
+CREATE TABLE Sfide{
+	Id decimal(8,0) PRIMARY KEY,
+	Gioco decimal(8,0) REFERENCES Giochi (Id),
+	NSquadre decimal(3,0) NOT NULL,										//check che sia <= al max
+	Data date NOT NULL DEFAULT CURRENT_DATE,
+	Orario time NOT NULL DEFAULT CURRENT_TIME,
+	DurataMax interval MONTH TO SECOND NOT NULL,								           //da rivedere
+	Moderata boolean NOT NULL DEFAULT FALSE
+}
+
+CREATE TABLE Squadre{
+	Nome varchar(30),
+	Sfida decimal(8,0) REFERENCES Sfide (Id),
+	IconaSquadra varchar(100) REFERENCES IconeSquadre (Immagine),
+	PunteggioTotale integer DEFAULT 0,
+
+	PRIMARY KEY (Nome, Sfida)
+}
+
+CREATE TABLE Dadi{
+	Id decimal(8,0) PRIMARY KEY,
+	Gioco decimal(8,0) REFERENCES Giochi (Id),
+	Max decimal(1,0) NOT NULL DEFAULT 6,								//check che min e max siano uno maggiore 
+	Min decimal(1,0) NOT NULL DEFAULT 1							 //dell altro e che non superino 6
+}
+
+CREATE TABLE Caselle{
+	Gioco decimal(8,0) REFERENCES Giochi (Id),
+	NOrdine decimal(5,0) NOT NULL,
+	Video varchar(100),
+	Tipo varchar(50) NOT NULL DEFAULT 'NORMALE',							//ATTENTO
+	X integer NOT NULL,
+	Y integer NOT NULL,
+	GiocoDest decimal(8,0) REFERENCES Caselle (Gioco),
+	NOrdineDest decimal(8,0) REFERENCES Caselle (NOrdine),
+	Task decimal(8,0) REFERENCES Task (Id) ,	
+	TempoTask interval MONTH TO SECOND,                                                                             //QUA TIME
+
+	PRIMARY KEY (Gioco, NOrdine)
+}
+
+CREATE TABLE ConsegneUtenti{
+	IdConsegna decimal(8,0) PRIMARY KEY,
+	Utente varchar(50) REFERENCES Utenti (Email) NOT NULL,
+	Task decimal(8,0) REFERENCES Task (Id),	
+	File varchar(100)
+}
+
+CREATE TABLE Turni{
+	NTurno integer,
+	Squadra varchar(30) REFERENCES Squadre (Nome),
+	Sfida decimal(5,0) REFERENCES Squadre (Sfida),
+	TempoDiRisposta interval MONTH TO SECOND NOT NULL,                           //QUA TIME
+	PunteggioCasella integer NOT NULL,
+	LancioDadi integer,
+	ConsegnaSquadra integer REFERENCES ConsegneUtenti (IdConsegna) NOT NULL,
+	Gioco decimal(8,0) REFERENCES Caselle (Gioco) NOT NULL,
+	NOrdine decimal(5,0) REFERENCES Caselle (NOrdine) NOT NULL,
+
+	PRIMARY KEY (NTurno, Squadra, Sfida)
+}
+
+CREATE TABLE Podio{
+	Posizione integer,				//check che sia tra 1 e 3 e che non si ripetano
+	Sfida decimal(8,0) REFERENCES Sfide (Id),
+	X integer  NOT NULL,
+	Y integer  NOT NULL,
+	IconaSquadra varchar(100) REFERENCES IconeSquadre (Immagine) NOT NULL,
+	
+	PRIMARY KEY (Posizione, Sfida)
+}
+
+CREATE TABLE RisposteQuiz{
+	NRisposta decimal(1,0),					
+	Quiz decimal(8,0) REFERENCES Quiz (Id),
+	Testo varchar(400) NOT NULL,
+	Immagine varchar(100),
+	Punteggio integer NOT NULL
+
+	PRIMARY KEY (NRisposta, Quiz)
+}
+
+CREATE TABLE GiocaIn{
+	Email varchar(50) Email),
+	Squadra varchar(30) REFERENCES Squadre (Nome),
+	Sfida decimal(8,0) REFERENCES Squadre (Sfida),
+	Ruolo varchar(30) NOT NULL DEFAULT 'Giocatore',									//OJO al CHECK
+
+	PRIMARY KEY (Email, Squadra, Sfida)
+}
+
+CREATE TABLE DadiSquadre{
+	Dado decimal(8,0) REFERENCES Dadi (Id),
+	Squadra varchar(30) REFERENCES Squadre (Nome),
+	Sfida decimal(8,0) REFERENCES Squadre (Sfida),
+
+	PRIMARY KEY (Dado, Squadra, Sfida)
+}
+
+CREATE TABLE QuizCaselle{
+	Gioco decimal(8,0) REFERENCES Caselle (Gioco),
+	NOrdine decimal(5,0) REFERENCES Caselle (NOrdine),
+	Quiz decimal(8,0) REFERENCES Quiz (Id),
+	TempoQuiz interval MONTH TO SECOND NOT NULL,
+
+	PRIMARY KEY(Gioco, NOrdine, Quiz)
+}
+
+CREATE TABLE ConsegneQuiz{
+	IdConsegna decimal(8,0) REFERENCES ConsegneUtenti (IdConsegna),
+	NRisposta decimal(1,0) REFERENCES RisposteQuiz (NRisposta),
+	Quiz decimal(8,0) REFERENCES RisposteQuiz (Quiz),
+
+	PRIMARY KEY (IdConsegna, NRisposta, Quiz)
+}
