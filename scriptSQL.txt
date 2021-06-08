@@ -1,5 +1,5 @@
-create schema "online_challenge_activity";
-set search_path to "online_challenge_activity";
+create schema "oca";
+set search_path to "oca";
 set datestyle to "MDY";
 
 CREATE TABLE SetIcone(
@@ -8,7 +8,8 @@ CREATE TABLE SetIcone(
 );
 
 CREATE TABLE IconeSquadre(
-	Immagine varchar(100) PRIMARY KEY,
+	Id integer PRIMARY KEY,
+	Immagine varchar(100),
 	SetIcona varchar(30) REFERENCES SetIcone (Nome)
 );
 
@@ -55,7 +56,7 @@ CREATE TABLE Sfide(
 CREATE TABLE Squadre(
 	Nome varchar(30),
 	Sfida decimal(8,0) REFERENCES Sfide (Id),
-	IconaSquadra varchar(100) REFERENCES IconeSquadre (Immagine),
+	IconaSquadra integer REFERENCES IconeSquadre (id),
 	PunteggioTotale integer DEFAULT 0,
 
 	PRIMARY KEY (Nome, Sfida)
@@ -64,8 +65,8 @@ CREATE TABLE Squadre(
 CREATE TABLE Dadi(
 	Id decimal(8,0) PRIMARY KEY,
 	Gioco decimal(8,0) REFERENCES Giochi (Id),
-	Massimo decimal(1,0) NOT NULL DEFAULT 6 CONSTRAINT CheckMax CHECK(Massimo<=6 AND Massimo>=0),								
-	Minimo decimal(1,0) NOT NULL DEFAULT 1 CONSTRAINT CheckMin CHECK(Minimo<=6 AND Minimo>=0),
+	Massimo decimal(4,0) NOT NULL DEFAULT 6 CONSTRAINT CheckMax CHECK(Massimo<=6 AND Massimo>=0),								
+	Minimo decimal(4,0) NOT NULL DEFAULT 1 CONSTRAINT CheckMin CHECK(Minimo<=6 AND Minimo>=0),
 	CONSTRAINT MinMax CHECK(Minimo<=Massimo)
 );
 
@@ -115,7 +116,7 @@ CREATE TABLE Podio(
 	Sfida decimal(8,0) REFERENCES Sfide (Id),
 	X integer  NOT NULL CONSTRAINT XPositivePodio CHECK(X>=0),
 	Y integer  NOT NULL CONSTRAINT YPositivePodio CHECK(Y>=0),
-	IconaSquadra varchar(100) REFERENCES IconeSquadre (Immagine) NOT NULL,
+	IconaSquadra integer REFERENCES IconeSquadre (id) NOT NULL,
 	
 	PRIMARY KEY (Posizione, Sfida)
 );
