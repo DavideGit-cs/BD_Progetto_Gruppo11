@@ -1,0 +1,56 @@
+--INSERT INTO GiocaIn VALUES('TonMcCormick@lycos.gov','LYA6K5b4', 3, 'Giocatore’);
+--INSERT INTO GiocaIn VALUES('TonMcCormick@lycos.gov','IblAxd2PuxU6ydnH0', 11, 'Giocatore’);
+--INSERT INTO GiocaIn VALUES('TonMcCormick@lycos.gov','Hn10u3cl4ITb07gQVe', 16, 'Giocatore');
+
+--INSERT INTO GiocaIn VALUES('R.Patricelli5@telefonica.co.uk','Bc4', 1, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('R.Patricelli5@telefonica.co.uk','mz8wpbII', 2, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('H.Fox@aol.be','Bc4', 1, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('Eric.Wood@mobileme.org','Bc4', 1, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('H.Fox@aol.be','mz8wpbII', 2, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('Eric.Wood@mobileme.org','mz8wpbII', 2, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('R.Patricelli5@telefonica.co.uk','LYA6K5b4', 3, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('H.Fox@aol.be','LYA6K5b4', 3, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('Eric.Wood@mobileme.org','LYA6K5b4', 3, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('R.Patricelli5@telefonica.co.uk','IblAxd2PuxU6ydnH0', 11, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('H.Fox@aol.be','IblAxd2PuxU6ydnH0', 11, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('Eric.Wood@mobileme.org','IblAxd2PuxU6ydnH0', 11, 'Giocatore');
+
+--INSERT INTO Podio VALUES (1,5,14,45,3);
+--INSERT INTO Podio VALUES (2,5,16,45,5);
+--INSERT INTO Podio VALUES (3,5,17,45,7);
+
+--INSERT INTO GiocaIn VALUES('A.Uitergeest@telfort.us','iP', 5, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('R.Patricelli5@telefonica.co.uk','4FALniZUOlhuzFyM', 5, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('H.Fox@aol.be','UoNyCB', 5, 'Giocatore');
+--INSERT INTO GiocaIn VALUES('Eric.Wood@mobileme.org','ck32TE2C', 5, 'Giocatore');
+
+--INSERT INTO consegneutenti VALUES (1, 'A.Uitergeest@telfort.us', null, null);
+--INSERT INTO consegneutenti VALUES (2, 'R.Patricelli5@telefonica.co.uk', null, null);
+--INSERT INTO consegneutenti VALUES (3, 'H.Fox@aol.be', null, null);
+--INSERT INTO consegneutenti VALUES (4, 'Eric.Wood@mobileme.org', null, null);
+
+--INSERT INTO turni VALUES(1, 'iP', 5, '0 days 03:00:00', 1454, null, 1, 9, 1);
+--INSERT INTO turni VALUES(1, 'ck32TE2C', 5, '0 days 03:00:00', 1454, null, 4, 9, 1);
+--INSERT INTO turni VALUES(1, 'UoNyCB', 5, '0 days 03:00:00', 1454, null, 3, 9, 1);
+--INSERT INTO turni VALUES(1, '4FALniZUOlhuzFyM', 5, '0 days 03:00:00', 1454, null, 2, 9, 1);
+
+--INSERT INTO turni VALUES(2, 'iP', 5, '0 days 03:00:00', 25094, null, 1, 9, 16);
+--INSERT INTO turni VALUES(2, 'ck32TE2C', 5, '0 days 03:00:00', 530072, null, 4, 9, 107);
+--INSERT INTO turni VALUES(2, 'UoNyCB', 5, '0 days 03:00:00', 23146, null, 3, 9, 125);
+--INSERT INTO turni VALUES(2, '4FALniZUOlhuzFyM', 5, '0 days 03:00:00', 635271, null, 2, 9, 181);
+
+
+--ICONE
+--8 3 7 5
+
+
+--GIOCO: 9
+--CASELLE: 1 16 107 125 181 191
+
+
+--SFIDA: 5
+--squadre: 
+--UoNyCB
+--4FALniZUOlhuzFyM ---> 1
+--iP  ---> 3
+--ck32TE2C ---> 2

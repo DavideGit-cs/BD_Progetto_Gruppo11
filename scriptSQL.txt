@@ -44,20 +44,21 @@ CREATE TABLE Giochi(
 
 CREATE TABLE Sfide(
 	Id decimal(8,0) PRIMARY KEY,
-	Gioco decimal(8,0) REFERENCES Giochi (Id),
+	Gioco decimal(8,0) REFERENCES Giochi (Id) NOT NULL,
 	NSquadre decimal(3,0) NOT NULL,					
 	Data date NOT NULL DEFAULT CURRENT_DATE,
 	Orario time NOT NULL DEFAULT CURRENT_TIME,
 	DurataMax interval DAY TO SECOND NOT NULL,
 	Moderata boolean NOT NULL DEFAULT FALSE,
-	Dummy char(50)
+	Dummy char(50),
+	Conclusa boolean NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE Squadre(
 	Nome varchar(30),
 	Sfida decimal(8,0) REFERENCES Sfide (Id),
 	IconaSquadra integer REFERENCES IconeSquadre (id),
-	PunteggioTotale integer DEFAULT 0,
+	PunteggioTotale integer DEFAULT 0 NOT NULL,
 
 	PRIMARY KEY (Nome, Sfida)
 );

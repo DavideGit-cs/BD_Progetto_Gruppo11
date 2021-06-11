@@ -1,0 +1,191 @@
+--WORKLOAD
+--1
+SELECT Id
+FROM Giochi
+WHERE NDadi=2 AND NSquadreMax<=4
+
+--2
+SELECT id
+FROM sfide
+WHERE gioco=A AND DurataMax > '0 days 02:00:00' AND Sfide.Data BETWEEN '2021-01-01' AND '2021-01-31' 
+UNION
+SELECT id
+FROM sfide
+WHERE gioco=A AND DurataMax ='0 days 00:30:00' AND Sfide.data BETWEEN '2021-03-01' AND '2021-03-31'
+
+--3
+SELECT Sfide.id AS SfidaID, Giochi.id AS GiochiID
+FROM Giochi JOIN Sfide ON Sfide.gioco = GIochi.id
+WHERE Giochi.ndadi>2 AND Sfide.DurataMax>'0 days 02:00:00'
+
+--INTERROGAZIONI
+--2A
+SELECT DISTINCT gioco
+FROM Caselle
+WHERE task IS NOT NULL
+
+
+--2B
+SELECT Giochi.id
+FROM giochi
+WHERE Giochi.id NOT IN
+	(SELECT Caselle.gioco
+	FROM Caselle
+	WHERE Caselle.task IS NOT NULL)
+
+--2C
+SELECT S.Id
+FROM Sfide AS S
+WHERE S.DurataMax >
+	(SELECT AVG(DurataMax) 
+	FROM Sfide
+	 WHERE Sfide.gioco = S.gioco)
+
+--VISTA
+
+CREATE VIEW InfoGiochi AS
+SELECT Sfide.gioco, COUNT(Sfide.Id) AS NumeroSfide, AVG(Sfide.DurataMax) AS MediaNumeroSfide, 
+SUM(NSquadre) AS NumeroSquadre, COUNT(GiocaIn.Email) AS NumeroUtenti, 
+MIN(Squadre.PunteggioTotale) AS PunteggioMinimo, AVG(Squadre.PunteggioTotale) AS PunteggioMedio, 
+MAX(Squadre.PunteggioTotale) AS PunteggioMassimo
+FROM Sfide JOIN GiocaIn ON
+Sfide.Id = GiocaIn.Sfida
+JOIN Squadre ON GiocaIn.Squadra = Squadre.Nome AND Squadre.Sfida = GiocaIn.Sfida
+GROUP BY Sfide.Gioco
+
+
+
+--FUNCTION 1
+CREATE OR REPLACE FUNCTION SfideDurata(IN G decimal(8,0))
+RETURNS TABLE(Id decimal(8,0)) AS
+$$
+BEGIN
+RETURN QUERY 
+SELECT S.Id
+FROM Sfide AS S
+WHERE S.DurataMax > (SELECT AVG(DurataMax) FROM Sfide WHERE Sfide.gioco = G) AND Gioco=G;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+
+--FUNCTION 2
+CREATE FUNCTION SceltaIcona(IN scelta integer, IN squadra varchar(30), IN sf decimal(8,0))
+RETURNS VOID AS
+$$
+DECLARE
+    aux integer;
+    ptr CURSOR FOR (SELECT IconeSquadre.Id
+                    FROM IconeSquadre
+                    WHERE SetIcona=(SELECT SetIcona FROM Giochi WHERE Id=(SELECT Gioco FROM Sfide WHERE Id=sf))
+                    EXCEPT
+                    SELECT IconaSquadra
+                    FROM Squadre
+                    WHERE Squadre.Sfida = sf);
+BEGIN
+    IF scelta IN (SELECT IconeSquadre.Id
+                  FROM IconeSquadre
+                  WHERE SetIcona=(SELECT SetIcona FROM Giochi WHERE Id=(SELECT Gioco FROM Sfide WHERE Id=sf))
+                  EXCEPT
+                  SELECT IconaSquadra
+                  FROM Squadre
+                  WHERE Squadre.Sfida = sf)
+        THEN
+            UPDATE Squadre
+            SET IconaSquadra=scelta
+            WHERE Squadre.Nome=squadra AND Squadre.Sfida=sf;
+        ELSE
+            RAISE NOTICE 'ERRORE: scelta invalida. Prova a scegliere una tra le seguenti icone';
+            OPEN ptr;
+            FETCH ptr INTO aux; 
+            WHILE FOUND LOOP
+                BEGIN
+                    RAISE NOTICE '%', aux;
+                    FETCH ptr INTO aux;
+                END;
+            END LOOP;
+            CLOSE ptr;
+    END IF;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+
+
+
+--TRIGGER 1
+CREATE OR REPLACE FUNCTION solo_una() 
+RETURNS trigger AS $solo_una$
+BEGIN
+IF (
+   SELECT COUNT(Email) 
+   FROM GiocaIn
+   WHERE  Email = NEW.Email 
+   AND Sfida IN (
+
+      SELECT Id
+      FROM Sfide
+      WHERE Conclusa = FALSE) 
+
+   ) >= 2
+
+   THEN 
+   RAISE EXCEPTION '% sta già partecipando ad una sfida', NEW.Email;
+ELSE
+   RETURN NEW;
+END IF;
+END;
+$solo_una$ LANGUAGE plpgsql;
+
+CREATE TRIGGER UnaSfidaAllaVolta
+AFTER INSERT OR UPDATE ON GiocaIn
+FOR EACH ROW
+EXECUTE PROCEDURE solo_una();
+
+
+
+
+
+--TRIGGER 2
+CREATE OR REPLACE FUNCTION AggiornoPodio()
+RETURNS trigger AS $aggiorna_podio$
+DECLARE
+CursorePodio CURSOR FOR
+SELECT IconaSquadra
+FROM Squadre
+WHERE Sfida = NEW.Sfida
+ORDER BY PunteggioTotale DESC
+LIMIT 3;
+iconaPodio integer;
+Pos INTEGER := 1;
+
+BEGIN
+UPDATE Squadre
+SET PunteggioTotale = 
+(SELECT 
+SUM(PunteggioCasella) FROM Turni
+WHERE Squadra = NEW.Squadra AND Sfida = NEW.Sfida)
+WHERE nome = NEW.Squadra AND Sfida = NEW.Sfida;
+OPEN CursorePodio;
+FETCH CursorePodio INTO iconaPodio;
+WHILE FOUND LOOP
+BEGIN
+UPDATE Podio
+SET IconaSquadra = iconaPodio
+WHERE Posizione = Pos;
+Pos := Pos + 1;
+FETCH CursorePodio INTO iconaPodio;
+END;
+END LOOP;
+CLOSE CursorePodio;
+RETURN NEW;
+END;
+$aggiorna_podio$ LANGUAGE plpgsql; 
+
+
+CREATE TRIGGER AggiornamentoPodio 
+AFTER INSERT OR UPDATE ON Turni
+FOR EACH ROW 
+EXECUTE PROCEDURE AggiornoPodio();

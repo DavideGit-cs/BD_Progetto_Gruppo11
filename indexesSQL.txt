@@ -1,0 +1,7 @@
+CREATE INDEX indexDadi ON Giochi (ndadi);
+
+CREATE INDEX SfidaGiocoIndex ON Sfide (gioco);
+
+CLUSTER Giochi USING indexDadi;
+
+CLUSTER Sfide USING SfidaGiocoIndex;
